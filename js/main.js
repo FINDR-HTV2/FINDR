@@ -1,15 +1,7 @@
 function initMap() {
-    // var locations = [
-    //     ['Bondi Beach', -33.890542, 151.274856, 4],
-    //     ['Coogee Beach', -33.923036, 151.259052, 5],
-    //     ['Cronulla Beach', -34.028249, 151.157507, 3],
-    //     ['Manly Beach', -33.80010128657071, 151.28747820854187, 2],
-    //     ['Maroubra Beach', -33.950198, 151.259302, 1]
-    // ];
-    
     var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 10,
-        center: new google.maps.LatLng(-33.92, 151.25),
+        zoom: 19,
+        center: new google.maps.LatLng(43.786756, -79.1898),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     });
 	
@@ -30,24 +22,26 @@ function initMap() {
 	firebase.initializeApp(config);
 	
     
-    firebase.database().ref('/locations').on('value', function(snapshot) {
+    firebase.database().ref('/people').on('value', function(snapshot) {
         clearOverlays();
-		var locations = snapshot.val();
-        for (var name in locations) {
-            var marker = new google.maps.Marker({
-                position: new google.maps.LatLng(locations[name][0], locations[name][1]),
+		var data = snapshot.val();
+        for (var name in data) {
+			var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(data[name].latitude, data[name].longitude),
                 animation: google.maps.Animation.DROP,
                 map: map
             });
             markersArray.push(marker);
+			
             google.maps.event.addListener(marker, 'click', (function(marker, locationName) {
                 return function() {
-                    infoWindow.setContent(locationName);
-                    infoWindow.open(map, marker);
+					var base64 = "data:image/png;base64," + data[locationName].image;
+					var image = new Image();
+					image.src = base64;
+					infoWindow.setContent(image);
+					infoWindow.open(map, marker);
                 }
             })(marker, name));
         }
     });
-
- 
 }
